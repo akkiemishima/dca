@@ -1813,7 +1813,7 @@ function renderWControls() {
   const c1 = document.getElementById('wcontrols-1');
   if (c1) {
     c1.innerHTML =
-      makeWCtrl('w1p','今ある資金', 1000, 300000000, 1000, wState.w1_principal, fmtPrincipal, 'var(--coral)') +
+      makeWCtrl('w1p','今ある資金', 10000, 150000000, 10000, wState.w1_principal, fmtPrincipal, 'var(--coral)') +
       makeWCtrl('w1r','利回り（年率）', 0, 15, 0.1, wState.w1_rate, fmtPct) +
       makeWCtrl('w1w','毎月の引出額', 1000, 500000, 1000, wState.w1_withdraw, fmtWithdraw, 'var(--gold)');
     bindWSlider('w1p','w1_principal',fmtPrincipal,calcW1);
@@ -1824,7 +1824,7 @@ function renderWControls() {
   const c2 = document.getElementById('wcontrols-2');
   if (c2) {
     c2.innerHTML =
-      makeWCtrl('w2p','今ある資金', 1000, 300000000, 1000, wState.w2_principal, fmtPrincipal, 'var(--coral)') +
+      makeWCtrl('w2p','今ある資金', 10000, 150000000, 10000, wState.w2_principal, fmtPrincipal, 'var(--coral)') +
       makeWCtrl('w2r','利回り（年率）', 0, 15, 0.1, wState.w2_rate, fmtPct) +
       makeWCtrl('w2y','取り崩し期間', 1, 50, 1, wState.w2_years, fmtYr, 'var(--gold)');
     bindWSlider('w2p','w2_principal',fmtPrincipal,calcW2);
@@ -1835,7 +1835,7 @@ function renderWControls() {
   const c3 = document.getElementById('wcontrols-3');
   if (c3) {
     c3.innerHTML =
-      makeWCtrl('w3p','今ある資金', 1000, 300000000, 1000, wState.w3_principal, fmtPrincipal, 'var(--coral)') +
+      makeWCtrl('w3p','今ある資金', 10000, 150000000, 10000, wState.w3_principal, fmtPrincipal, 'var(--coral)') +
       makeWCtrl('w3w','毎月の引出額', 1000, 500000, 1000, wState.w3_withdraw, fmtWithdraw, 'var(--gold)') +
       makeWCtrl('w3y','取り崩し期間', 1, 50, 1, wState.w3_years, fmtYr);
     bindWSlider('w3p','w3_principal',fmtPrincipal,calcW3);
@@ -1887,12 +1887,24 @@ function inheritFromSavings() {
   } else {
     fv = state.target;
   }
-  const rounded = Math.round(fv / 1000000) * 1000000;
-  const clamped = Math.max(1000000, Math.min(300000000, rounded));
+  const MAX_SLIDER = 150000000;
+  const rounded = Math.round(fv / 10000) * 10000;
+  // 将来価値が上限超なら上限を拡張
+  const actualVal = rounded;
+  const sliderMax = fv > MAX_SLIDER ? Math.ceil(fv / 10000000) * 10000000 : MAX_SLIDER;
+  ['ws-w1p','ws-w2p','ws-w3p'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.max = sliderMax; el.step = 10000; }
+  });
+  const clamped = Math.max(10000, actualVal);
+  // 毎月引き出し額 = 将来価値の年5%÷12
+  const withdraw5pct = Math.max(10000, Math.round(fv * 0.05 / 12 / 10000) * 10000);
 
   wState.w1_principal = clamped;
   wState.w2_principal = clamped;
   wState.w3_principal = clamped;
+  wState.w1_withdraw = withdraw5pct;
+  wState.w3_withdraw = withdraw5pct;
 
   ['ws-w1p','ws-w2p','ws-w3p'].forEach(id => {
     const el = document.getElementById(id);
