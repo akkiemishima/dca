@@ -571,47 +571,8 @@ input[type=range]::-webkit-slider-thumb {
 #pw-error { font-size: 12px; color: #e8816a; min-height: 18px; }
 #pw-box .pw-lock { font-size: 40px; margin-bottom: 0.8rem; }
 </style>
-<div id="pw-gate">
-  <div id="pw-box">
-    <div class="pw-lock">🔐</div>
-    <h2>パスワードが必要です</h2>
-    <p class="pw-sub">このツールはnote記事購入者向けです。<br>以下の記事を購入するとパスワードが入手できます。</p>
-    <a class="pw-note-link" href="https://note.com/akkiemishima/n/n55d20f53d94b" target="_blank" rel="noopener noreferrer">
-      <div class="pw-note-title">👉 破綻も上場も見たCFOが、それでも積立をすすめる理由</div>
-      <div class="pw-note-desc">note.com/akkiemishima ／ ¥580　← タップして記事を購入</div>
-    </a>
-    <div id="pw-input-wrap">
-      <input type="password" id="pw-input" placeholder="パスワードを入力" autocomplete="off">
-      <button id="pw-submit" onclick="checkPW()">開く</button>
-    </div>
-    <div id="pw-error"></div>
-  </div>
-</div>
-<script>
-(function(){
-  // セッション中は再入力不要
-  if(sessionStorage.getItem('pw_ok')==='1'){
-    document.getElementById('pw-gate').style.display='none';
-    return;
-  }
-  document.getElementById('pw-input').addEventListener('keydown',function(e){
-    if(e.key==='Enter') checkPW();
-  });
-})();
-async function checkPW(){
-  const val = document.getElementById('pw-input').value;
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(val));
-  const hex = Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
-  if(hex==='c39986583f4bc560bcc38494992e66f72ef3d1478abbf48091bf3e2849760d50'){
-    sessionStorage.setItem('pw_ok','1');
-    document.getElementById('pw-gate').style.display='none';
-  } else {
-    document.getElementById('pw-error').textContent='パスワードが違います。note記事をご確認ください。';
-    document.getElementById('pw-input').value='';
-    document.getElementById('pw-input').focus();
-  }
-}
-</script>
+
+
 <!-- PASSWORD GATE END -->
 
 <!-- プロフィールバー -->
@@ -2162,18 +2123,19 @@ function updateChartComment(principal, fv) {
 
 // ページ読み込み時に自動初期化
 window.addEventListener('DOMContentLoaded', () => {
+  // パスワード画面を表示
+  document.getElementById('pw-overlay').style.display = 'flex';
+
   // 「将来いくら？」モードで初期化
   mode = 'future';
   document.querySelectorAll('.mode-tab').forEach((t, i) => {
-    t.classList.toggle('active', i === 1); // 2番目タブ（将来いくら？）をactive
+    t.classList.toggle('active', i === 1);
   });
   const descEl = document.getElementById('mode-desc-text');
   if (descEl && typeof modeDescs !== 'undefined') descEl.innerHTML = modeDescs['future'];
   renderControls(); update();
   bindAgeSlider();
   if (typeof renderWControls === 'function') renderWControls();
-  // ウィザードを表示
-  document.getElementById('wizard-overlay').style.display = 'flex';
 });
 
 </script>
